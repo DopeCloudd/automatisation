@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  db:
+    container_name: zoomapp
+    image: mysql:8
+    platform: linux/arm64
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: zoomapp
+      MYSQL_USER: zoomapp
+      MYSQL_PASSWORD: secret
+    volumes:
+      - zoomapp_data:/var/lib/mysql
+    restart: unless-stopped
+
+  phpmyadmin:
+    container_name: phpmyadmin_zoomapp
+    image: phpmyadmin/phpmyadmin
+    platform: linux/amd64
+    depends_on:
+      - db
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+    restart: unless-stopped
+
+volumes:
+  zoomapp_data:
