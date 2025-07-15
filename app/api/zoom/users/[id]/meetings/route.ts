@@ -1,10 +1,17 @@
 import { getZoomToken } from "@/lib/zoom/token-manager";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(
-  _req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams;
+  const id = searchParams.get("id");
+
+  if (!id) {
+    return NextResponse.json(
+      { error: "L'ID de l'utilisateur Zoom est requis." },
+      { status: 400 }
+    );
+  }
+
   const token = await getZoomToken();
 
   if (!token) {
@@ -14,7 +21,7 @@ export async function GET(
     );
   }
 
-  const userId = decodeURIComponent(params.id);
+  const userId = decodeURIComponent(id);
 
   try {
     const res = await fetch(
