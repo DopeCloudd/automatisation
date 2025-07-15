@@ -18,10 +18,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useCreateZoomMeeting } from "@/hooks/use-zoom-meetings";
 import { useZoomUsers } from "@/hooks/use-zoom-users";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -119,9 +119,8 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 export function CreateMeetingForm() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   const { data: formatrices } = useZoomUsers();
+  const { mutateAsync: createMeeting, isPending } = useCreateZoomMeeting();
 
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -137,36 +136,19 @@ export function CreateMeetingForm() {
   });
 
   async function onSubmit(values: FormData) {
-    setIsSubmitting(true);
     try {
-      const res = await fetch("/api/zoom/create-meeting", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...values,
-          timezone: "Europe/Paris",
-          invitees: values.invitees
-            ?.split(",")
-            .map((email) => email.trim())
-            .filter((email) => email),
-        }),
+      await createMeeting({
+        ...values,
+        type: Number(values.type),
       });
-      if (!res.ok) {
-        throw new Error("Erreur lors de la création du meeting");
-      }
-      toast.success("Réunion créée avec succès !");
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        toast.error("Échec de la création de la réunion", {
-          description: error.message,
-        });
-      } else {
-        toast.error("Échec de la création de la réunion", {
-          description: "Une erreur inconnue est survenue",
-        });
-      }
-    } finally {
-      setIsSubmitting(false);
+
+      toast.success("Réunion créée avec succès !");
+    } catch (error) {
+      console.error("Erreur lors de la création de la réunion:", error);
+      toast.error("Erreur lors de la création de la réunion.", {
+        description:
+          error instanceof Error ? error.message : "Une erreur est survenue.",
+      });
     }
   }
 
@@ -334,9 +316,9 @@ export function CreateMeetingForm() {
         />
 
         <div className="flex justify-end">
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {isSubmitting ? "Création..." : "Créer la réunion"}
+          <Button type="submit" disabled={isPending}>
+            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isPending ? "Création..." : "Créer la réunion"}
           </Button>
         </div>
       </form>
