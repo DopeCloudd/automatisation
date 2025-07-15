@@ -3,9 +3,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   _req: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await context.params;
+  const { id } = params;
 
   if (!id) {
     return NextResponse.json(
@@ -24,7 +24,7 @@ export async function GET(
   }
 
   const response = await fetch(
-    `https://api.zoom.us/v2/meetings/${decodeURIComponent(id)}`,
+    `https://api.zoom.us/v2/meetings/${encodeURIComponent(id)}`,
     {
       method: "GET",
       headers: {
@@ -33,8 +33,6 @@ export async function GET(
       },
     }
   );
-
-  console.error(response);
 
   if (!response.ok) {
     const errorText = await response.text();
