@@ -40,13 +40,21 @@ export default function ZoomMeetingCalendar() {
     return <p>Aucune réunion trouvée.</p>;
   }
 
-  // Associer chaque email à une couleur unique
-  const uniqueEmails = Array.from(
-    new Set(data.map((d) => d.user.email))
-  ).sort();
+  // Associer chaque utilisateur à une couleur unique
+  const uniqueUsers = Array.from(
+    new Map(
+      data.map((d) => [
+        d.user.email,
+        {
+          email: d.user.email,
+          name: `${d.user.first_name} ${d.user.last_name}`,
+        },
+      ])
+    ).values()
+  ).sort((a, b) => a.name.localeCompare(b.name));
 
-  const emailToColor = uniqueEmails.reduce((acc, email, index) => {
-    acc[email] = COLORS[index % COLORS.length];
+  const emailToColor = uniqueUsers.reduce((acc, user, index) => {
+    acc[user.email] = COLORS[index % COLORS.length];
     return acc;
   }, {} as Record<string, string>);
 
@@ -70,15 +78,15 @@ export default function ZoomMeetingCalendar() {
     <Card className="p-4 space-y-4">
       {/* Légende */}
       <div className="flex flex-wrap gap-2">
-        {uniqueEmails.map((email) => (
+        {uniqueUsers.map((user) => (
           <Badge
-            key={email}
+            key={user.email}
             style={{
-              backgroundColor: emailToColor[email],
+              backgroundColor: emailToColor[user.email],
               color: "white",
             }}
           >
-            {email}
+            {user.name}
           </Badge>
         ))}
       </div>

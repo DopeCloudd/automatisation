@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const token = getZoomToken();
+  const token = await getZoomToken();
 
   if (!token) {
     return NextResponse.json(
@@ -21,16 +21,12 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const response = await fetch(
-    `https://api.zoom.us/v2/meetings/${encodeURIComponent(id)}`,
-    {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    }
-  );
+  const response = await fetch(`https://api.zoom.us/v2/meetings/${id}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
   if (!response.ok) {
     const errorText = await response.text();

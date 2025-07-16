@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const token = getZoomToken();
+  const token = await getZoomToken();
 
   if (!token) {
     return NextResponse.json(

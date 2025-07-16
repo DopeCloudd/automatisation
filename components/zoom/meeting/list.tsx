@@ -2,6 +2,13 @@
 
 import { Button } from "@/components/ui/button";
 import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -9,27 +16,40 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ZoomMeetingDetailsModal } from "@/components/zoom/meeting/modal-detail";
-import { useAllZoomMeetings } from "@/hooks/use-zoom-meetings";
+import {
+  useAllZoomMeetings,
+  useDeleteZoomMeeting,
+} from "@/hooks/use-zoom-meetings";
 import { X } from "lucide-react";
 import { useState } from "react";
 
 export default function ZoomEventsList() {
   const { data, isLoading, error } = useAllZoomMeetings();
+  const deleteMeeting = useDeleteZoomMeeting();
   const [selectedHost, setSelectedHost] = useState<string>("");
   const [selectedMeetingId, setSelectedMeetingId] = useState<string | null>(
     null
   );
+  const [meetingToDelete, setMeetingToDelete] = useState<string | null>(null);
 
   if (isLoading) return <p>Chargement...</p>;
   if (error) return <p>Erreur: {error.message}</p>;
 
-  // emails uniques
+  function handleDeleteMeetingConfirm() {
+    if (!meetingToDelete) return;
+    deleteMeeting.mutate(meetingToDelete);
+    setMeetingToDelete(null); // Ferme le modal
+  }
+
+  // formatrices uniques (par email, mais on affiche le nom)
   const uniqueHosts =
     data
-      ?.map((entry) => entry.user.email)
-      .filter(Boolean)
-      .filter((v, i, a) => a.indexOf(v) === i)
-      .sort() ?? [];
+      ?.map((entry) => ({
+        email: entry.user.email,
+        name: `${entry.user.first_name} ${entry.user.last_name}`,
+      }))
+      .filter((v, i, a) => a.findIndex((u) => u.email === v.email) === i)
+      .sort((a, b) => a.name.localeCompare(b.name)) ?? [];
 
   const filteredData = selectedHost
     ? data?.filter((entry) => entry.user.email === selectedHost)
@@ -46,9 +66,9 @@ export default function ZoomEventsList() {
             <SelectValue placeholder="Filtrer par formatrice" />
           </SelectTrigger>
           <SelectContent>
-            {uniqueHosts.map((email) => (
-              <SelectItem key={email} value={email}>
-                {email}
+            {uniqueHosts.map((host) => (
+              <SelectItem key={host.email} value={host.email}>
+                {host.name}
               </SelectItem>
             ))}
           </SelectContent>
@@ -91,14 +111,24 @@ export default function ZoomEventsList() {
                           : "Non précisé"}
                       </p>
                     </div>
-                    <Button
-                      variant="outline"
-                      onClick={() =>
-                        setSelectedMeetingId(meeting.id.toString())
-                      }
-                    >
-                      Détails
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={() =>
+                          setSelectedMeetingId(meeting.id.toString())
+                        }
+                      >
+                        Détails
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        onClick={() =>
+                          setMeetingToDelete(meeting.id.toString())
+                        }
+                      >
+                        Supprimer
+                      </Button>
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -122,6 +152,33 @@ export default function ZoomEventsList() {
           }}
         />
       )}
+
+      <Dialog
+        open={!!meetingToDelete}
+        onOpenChange={() => setMeetingToDelete(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Supprimer la réunion</DialogTitle>
+          </DialogHeader>
+          <p>
+            Êtes-vous sûr de vouloir supprimer cette réunion ? Cette action est
+            irréversible.
+          </p>
+          <DialogFooter className="flex justify-end gap-2 pt-4">
+            <Button variant="outline" onClick={() => setMeetingToDelete(null)}>
+              Annuler
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteMeetingConfirm}
+              disabled={deleteMeeting.isPending}
+            >
+              {deleteMeeting.isPending ? "Suppression..." : "Confirmer"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

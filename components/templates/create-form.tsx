@@ -269,7 +269,7 @@ export function CreateTemplatesForm() {
   async function onSubmit(values: FormData) {
     setIsSubmitting(true);
     try {
-      const response = await fetch("/api/generate-pptx", {
+      const response = await fetch("/zoom/api/generate-pptx", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -293,7 +293,10 @@ export function CreateTemplatesForm() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "document.pptx";
+      // Génère un nom de fichier de cette forme : Programme APPRONFONDI 8 RDV 13h du Bilan de Compétences - CREATYZ
+      const clientName =
+        values.client === "client1" ? "ORIENTATION" : "CREATYZ";
+      a.download = `Programme ${values.bilan.toUpperCase()} du Bilan de Compétences - ${clientName}.pptx`;
       document.body.appendChild(a);
       a.click();
       a.remove();
