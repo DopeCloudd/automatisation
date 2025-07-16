@@ -6,31 +6,31 @@ const steps = [
   {
     id: 1,
     name: "Création des réunions Zoom",
-    href: "/dashboard/meetings/create",
+    href: "/zoom/dashboard/meetings/create",
     icon: Users,
   },
   {
     id: 2,
     name: "Liste des formatrices",
-    href: "/dashboard/users/list",
+    href: "/zoom/dashboard/users/list",
     icon: List,
   },
   {
     id: 3,
     name: "Liste des réunions",
-    href: "/dashboard/meetings/list",
+    href: "/zoom/dashboard/meetings/list",
     icon: List,
   },
   {
     id: 4,
     name: "Calendrier des réunions",
-    href: "/dashboard/meetings/calendar",
+    href: "/zoom/dashboard/meetings/calendar",
     icon: Calendar,
   },
   {
     id: 5,
     name: "Réunions de l'apprenant",
-    href: "/dashboard/apprenant/mail",
+    href: "/zoom/dashboard/apprenant/mail",
     icon: User,
   },
 ];

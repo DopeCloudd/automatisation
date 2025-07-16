@@ -7,7 +7,7 @@ export default async function LoginPage() {
     const user = await getUser();
 
     if (user && user?.role !== "admin") {
-      redirect("/dashboard");
+      redirect("/zoom/dashboard");
     }
   } catch (error) {
     console.error("Erreur lors de la récupération de la session :", error);

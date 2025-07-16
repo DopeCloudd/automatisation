@@ -88,7 +88,7 @@ export default function LoginForm() {
                     setLoading(false);
                   },
                   onSuccess: () => {
-                    router.push("/dashboard");
+                    router.push("/zoom/dashboard");
                   },
                 }
               );

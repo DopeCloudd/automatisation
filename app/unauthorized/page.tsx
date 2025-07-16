@@ -29,7 +29,7 @@ export default function UnauthorizedPage() {
         </CardContent>
         <CardFooter>
           <Button asChild className="w-full">
-            <Link href="/dashboard">Retour au tableau de bord</Link>
+            <Link href="/zoom/dashboard">Retour au tableau de bord</Link>
           </Button>
         </CardFooter>
       </Card>
