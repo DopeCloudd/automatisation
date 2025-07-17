@@ -9,12 +9,12 @@ export default async function Home() {
     });
 
     if (!session) {
-      redirect("/zoom/login");
+      redirect("/login");
     } else {
-      redirect("/zoom/dashboard");
+      redirect("/dashboard");
     }
   } catch (error) {
     console.error("Erreur lors de la récupération de la session :", error);
-    redirect("/zoom/login");
+    redirect("/login");
   }
 }

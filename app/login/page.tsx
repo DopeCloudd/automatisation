@@ -6,7 +6,7 @@ export default async function LoginPage() {
   const user = await getUser();
 
   if (user) {
-    redirect("/zoom/dashboard");
+    redirect("/dashboard");
   }
 
   return (

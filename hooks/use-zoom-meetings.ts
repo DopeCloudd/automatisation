@@ -15,7 +15,7 @@ export function useAllZoomMeetings() {
   return useQuery<ZoomMeetingSummary[]>({
     queryKey: ["zoom", "allMeetings"],
     queryFn: async () => {
-      const res = await fetch("/zoom/api/zoom/meeting/list");
+      const res = await fetch("/api/zoom/meeting/list");
       if (!res.ok) {
         throw new Error("Impossible de récupérer les réunions Zoom");
       }
@@ -28,7 +28,7 @@ export function useUpcomingZoomEvents() {
   return useQuery({
     queryKey: ["zoom", "upcomingEvents"],
     queryFn: async (): Promise<UpcomingZoomEvent[]> => {
-      const res = await fetch("/zoom/api/zoom/report/upcoming_events");
+      const res = await fetch("/api/zoom/report/upcoming_events");
       if (!res.ok) {
         throw new Error("Impossible de récupérer les événements Zoom");
       }
@@ -43,7 +43,7 @@ export function useCreateZoomMeeting() {
     mutationFn: async (
       payload: CreateZoomMeetingInput
     ): Promise<CreateZoomMeetingResponse> => {
-      const res = await fetch("/zoom/api/zoom/meeting/create", {
+      const res = await fetch("/api/zoom/meeting/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -70,7 +70,7 @@ export function useZoomMeetingDetails(meetingId?: string) {
         throw new Error("meetingId is required to fetch meeting details");
       }
       const res = await fetch(
-        `/zoom/api/zoom/meeting/detail?id=${encodeURIComponent(meetingId)}`
+        `/api/zoom/meeting/detail?id=${encodeURIComponent(meetingId)}`
       );
       if (!res.ok) {
         throw new Error("Impossible de récupérer les détails de la réunion");
@@ -85,7 +85,7 @@ export function useDeleteZoomMeeting() {
 
   return useMutation({
     mutationFn: async (meetingId: string) => {
-      const res = await fetch(`/zoom/api/zoom/meeting/delete?id=${meetingId}`, {
+      const res = await fetch(`/api/zoom/meeting/delete?id=${meetingId}`, {
         method: "DELETE",
       });
       if (!res.ok) {

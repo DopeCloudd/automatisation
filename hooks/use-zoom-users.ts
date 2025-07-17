@@ -19,7 +19,7 @@ export function useZoomUsers() {
     queryFn: async (): Promise<
       { id: string; name: string; email: string }[]
     > => {
-      const response = await fetch("/zoom/api/zoom/users");
+      const response = await fetch("/api/zoom/users");
       if (!response.ok) {
         throw new Error("Failed to fetch Zoom users");
       }

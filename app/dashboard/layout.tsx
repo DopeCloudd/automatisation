@@ -12,7 +12,7 @@ export default async function DashboardLayout({
   const user = await getUser();
 
   if (!user) {
-    redirect("/zoom/login");
+    redirect("/login");
   }
 
   return (

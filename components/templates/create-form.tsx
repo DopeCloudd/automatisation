@@ -269,7 +269,7 @@ export function CreateTemplatesForm() {
   async function onSubmit(values: FormData) {
     setIsSubmitting(true);
     try {
-      const response = await fetch("/zoom/api/generate-pptx", {
+      const response = await fetch("/api/generate-pptx", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
