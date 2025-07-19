@@ -27,8 +27,8 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 const CLIENTS = [
-  { id: "client1", name: "Client 1 - ORIENTATION" },
-  { id: "client2", name: "Client 2 - CREATYZ" },
+  { id: "client1", name: "Client 1 - CREATYZ" },
+  { id: "client2", name: "Client 2 - ORIENTATION" },
 ];
 
 const CLIENT_1_BILANS = [
@@ -225,11 +225,6 @@ const CLIENT_2_BILANS = [
   },
 ];
 
-const CLIENT_FORMATRICES: Record<string, string[]> = {
-  client2: ["Cécile BOISSEROLLE", "Clémence RINEAU"],
-  client1: ["Aurélie VINCENT BRITO", "Laura DEMARCQ SPALVIERI"],
-};
-
 const schema = z.object({
   client: z.enum(["client1", "client2"], {
     required_error: "Le client est requis",
@@ -307,6 +302,21 @@ export function CreateTemplatesForm() {
     }
   }
 
+  console.log("Formatrices:", formatrices);
+
+  // Filtrer les formatrices pour ne garder que : Aurelie, Cecile, Clemence et Laura
+  const validFormatrices = formatrices?.filter(
+    (f) =>
+      f.name &&
+      f.email &&
+      [
+        "Aurélie VINCENT BRITO",
+        "Cécile BOISSEROLLE",
+        "Clémence RINEAU",
+        "Laura DEMARCQ SPALVIERI",
+      ].includes(f.name)
+  );
+
   return (
     <Form {...form}>
       <form
@@ -383,34 +393,26 @@ export function CreateTemplatesForm() {
         <FormField
           control={form.control}
           name="formatrice"
-          render={({ field }) => {
-            const selectedClient = form.watch("client");
-
-            const allowedFormatrices = formatrices?.filter((f) =>
-              CLIENT_FORMATRICES[selectedClient]?.includes(f.name)
-            );
-
-            return (
-              <FormItem>
-                <FormLabel>Formatrice</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choisir une formatrice" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {allowedFormatrices?.map((f) => (
-                      <SelectItem key={f.id} value={f.name}>
-                        {f.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            );
-          }}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Formatrice</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choisir une formatrice" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {validFormatrices?.map((f) => (
+                    <SelectItem key={f.id} value={f.name}>
+                      {f.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
         />
 
         <FormField

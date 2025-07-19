@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useZoomMeetingDetails } from "@/hooks/use-zoom-meetings";
-import { CalendarClock, Clock, Loader2, User2 } from "lucide-react";
+import { CalendarClock, Clock, Copy, Loader2, User2 } from "lucide-react";
 
 interface Props {
   meetingId: string;
@@ -92,6 +92,28 @@ export function ZoomMeetingDetailsModal({
               <div>
                 <Badge variant="outline">{String(data.timezone)}</Badge>
               </div>
+            </div>
+
+            {/* Lien de la reunion avec un bouton copier */}
+            <div className="pt-2">
+              <p className="text-sm text-muted-foreground">
+                Lien de la réunion
+              </p>
+              <a
+                href={data.join_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
+                {data.join_url}
+              </a>
+              <Button
+                variant="outline"
+                className="mt-2 ml-4"
+                onClick={() => navigator.clipboard.writeText(data.join_url)}
+              >
+                <Copy className="w-4 h-4" />
+              </Button>
             </div>
 
             {/* Bouton rejoindre */}

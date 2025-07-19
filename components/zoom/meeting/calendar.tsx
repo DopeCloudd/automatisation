@@ -2,6 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useAllZoomMeetings } from "@/hooks/use-zoom-meetings";
 import frLocale from "@fullcalendar/core/locales/fr";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -9,6 +10,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import { Loader2 } from "lucide-react";
+import { useState } from "react";
 
 const COLORS = [
   "#1abc9c",
@@ -22,6 +24,7 @@ const COLORS = [
 
 export default function ZoomMeetingCalendar() {
   const { data, isLoading, error } = useAllZoomMeetings();
+  const [visibleUsers, setVisibleUsers] = useState<string[]>([]);
 
   if (isLoading) {
     return (
@@ -40,7 +43,6 @@ export default function ZoomMeetingCalendar() {
     return <p>Aucune réunion trouvée.</p>;
   }
 
-  // Associer chaque utilisateur à une couleur unique
   const uniqueUsers = Array.from(
     new Map(
       data.map((d) => [
@@ -53,45 +55,65 @@ export default function ZoomMeetingCalendar() {
     ).values()
   ).sort((a, b) => a.name.localeCompare(b.name));
 
+  // Init visibleUsers (tous cochés par défaut)
+  if (visibleUsers.length === 0) {
+    setVisibleUsers(uniqueUsers.map((u) => u.email));
+  }
+
   const emailToColor = uniqueUsers.reduce((acc, user, index) => {
     acc[user.email] = COLORS[index % COLORS.length];
     return acc;
   }, {} as Record<string, string>);
 
-  // Transforme les données en événements FullCalendar
-  const events = data.flatMap((entry) =>
-    entry.meetings.map((meeting) => ({
-      id: meeting.id.toString(),
-      title: meeting.topic,
-      start: meeting.start_time,
-      url: `https://zoom.us/j/${meeting.id}`,
-      backgroundColor: emailToColor[entry.user.email],
-      borderColor: emailToColor[entry.user.email],
-      extendedProps: {
-        host: `${entry.user.first_name} ${entry.user.last_name}`,
-        email: entry.user.email,
-      },
-    }))
-  );
+  const events = data
+    .filter((entry) => visibleUsers.includes(entry.user.email))
+    .flatMap((entry) =>
+      entry.meetings.map((meeting) => ({
+        id: meeting.id.toString(),
+        title: meeting.topic,
+        start: meeting.start_time,
+        url: `https://zoom.us/j/${meeting.id}`,
+        backgroundColor: emailToColor[entry.user.email],
+        borderColor: emailToColor[entry.user.email],
+        extendedProps: {
+          host: `${entry.user.first_name} ${entry.user.last_name}`,
+          email: entry.user.email,
+        },
+      }))
+    );
+
+  const toggleUserVisibility = (email: string) => {
+    setVisibleUsers((prev) =>
+      prev.includes(email) ? prev.filter((e) => e !== email) : [...prev, email]
+    );
+  };
 
   return (
     <Card className="p-4 space-y-4">
-      {/* Légende */}
-      <div className="flex flex-wrap gap-2">
+      {/* Légende avec cases à cocher */}
+      <div className="flex flex-wrap gap-4">
         {uniqueUsers.map((user) => (
-          <Badge
+          <label
             key={user.email}
-            style={{
-              backgroundColor: emailToColor[user.email],
-              color: "white",
-            }}
+            className="flex items-center gap-2 cursor-pointer"
           >
-            {user.name}
-          </Badge>
+            <Checkbox
+              checked={visibleUsers.includes(user.email)}
+              onCheckedChange={() => toggleUserVisibility(user.email)}
+            />
+            <Badge
+              style={{
+                backgroundColor: emailToColor[user.email],
+                color: "white",
+              }}
+            >
+              {user.name}
+            </Badge>
+          </label>
         ))}
       </div>
 
-      {/* Calendrier FullCalendar */}
+      {/* Calendrier */}
       <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
         initialView="timeGridWeek"
