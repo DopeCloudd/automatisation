@@ -36,9 +36,10 @@ export async function POST(req: NextRequest) {
     start_time: start_time ? new Date(start_time).toISOString() : undefined,
     duration: duration,
     timezone,
+    default_password: false,
     settings: {
-      host_video: true,
-      participant_video: true,
+      host_video: false,
+      participant_video: false,
       join_before_host: false,
       mute_upon_entry: true,
       waiting_room: true,
@@ -47,6 +48,9 @@ export async function POST(req: NextRequest) {
         .map((email: string) => email.trim())
         .filter((email: string) => email)
         .map((email: string) => ({ email })),
+      calendar_type: 2,
+      email_notification: false,
+      push_change_to_calendar: true,
     },
   };
 

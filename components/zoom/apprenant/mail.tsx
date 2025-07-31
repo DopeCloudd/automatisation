@@ -9,6 +9,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { CopyableHtmlEmail } from "@/components/ui/html-email-textarea";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -17,8 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { useZoomUsers } from "@/hooks/use-zoom-users";
+import { fetchZoomMeetingsWithInvitee } from "@/lib/zoom/mail-meetings";
 import { ZoomMeetingDetails } from "@/types/zoom-meetings";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
@@ -57,18 +58,12 @@ export function SearchMeetingsByInvitee() {
     setMeetings([]);
 
     try {
-      const res = await fetch(
-        `/api/zoom/users/${encodeURIComponent(values.userId)}/meetings`
-      );
-      if (!res.ok)
-        throw new Error("Erreur lors de la récupération des réunions");
-      const data = await res.json();
-
-      const filtered = data.filter((meeting: ZoomMeetingDetails) =>
-        String(meeting.settings?.alternative_hosts || "").includes(values.email)
+      const filteredMeetings = await fetchZoomMeetingsWithInvitee(
+        values.userId,
+        values.email
       );
 
-      setMeetings(filtered);
+      setMeetings(filteredMeetings);
       setSearched(true);
     } catch (error) {
       console.error(error);
@@ -80,11 +75,8 @@ export function SearchMeetingsByInvitee() {
   }
 
   // Génère le texte du mail
-  const emailBody = meetings.length
-    ? `Bonjour,
-
-Voici le planning de vos ateliers :
-
+  const emailHtml = meetings.length
+    ? `<ul>
 ${meetings
   .map((m) => {
     const date = new Date(m.start_time);
@@ -93,9 +85,10 @@ ${meetings
       hour: "2-digit",
       minute: "2-digit",
     });
-    return `• ${dateStr} à ${timeStr} - ${m.topic}\n${m.join_url}`;
+    return `<li><a href="${m.join_url}" target="_blank" rel="noreferrer">${dateStr} à ${timeStr} - ${m.topic}</a></li>`;
   })
-  .join("\n\n")}
+  .join("")}
+</ul>
 `
     : "";
 
@@ -171,13 +164,12 @@ ${meetings
         {/* Résultats */}
         {searched && (
           <div className="space-y-4">
-            <h3 className="font-semibold">Résultats :</h3>
             {meetings.length === 0 ? (
               <p>Aucune réunion trouvée avec cet email parmi les invités.</p>
             ) : (
               <>
                 {/* Listing */}
-                <ul className="space-y-2">
+                {/* <ul className="space-y-2">
                   {meetings.map((m) => {
                     const date = new Date(m.start_time);
                     return (
@@ -202,19 +194,11 @@ ${meetings
                       </li>
                     );
                   })}
-                </ul>
+                </ul> */}
 
                 {/* Mail prêt à copier */}
                 <div>
-                  <FormLabel className="mb-1 block">
-                    Texte de mail à copier :
-                  </FormLabel>
-                  <Textarea
-                    readOnly
-                    value={emailBody}
-                    className="font-mono text-sm"
-                    rows={meetings.length * 2 + 4}
-                  />
+                  <CopyableHtmlEmail html={emailHtml} />
                 </div>
               </>
             )}

@@ -1,4 +1,5 @@
 import { getZoomToken } from "@/lib/zoom/token-manager";
+import { ZoomMeetingDetails } from "@/types/zoom-meetings";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -24,6 +25,7 @@ export async function GET(request: NextRequest) {
   const userId = decodeURIComponent(id);
 
   try {
+    // Récupère les réunions de l'utilisateur Zoom
     const res = await fetch(
       `https://api.zoom.us/v2/users/${encodeURIComponent(
         userId
@@ -46,7 +48,29 @@ export async function GET(request: NextRequest) {
 
     const data = await res.json();
 
-    return NextResponse.json(data.meetings || []);
+    // On parcourt les réunions et pour chaque réunion, on récupère les détails
+    const meetings: ZoomMeetingDetails[] = await Promise.all(
+      data.meetings.map(async (meeting: ZoomMeetingDetails) => {
+        const meetingDetailsRes = await fetch(
+          `https://api.zoom.us/v2/meetings/${meeting.id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!meetingDetailsRes.ok) {
+          const errorText = await meetingDetailsRes.text();
+          throw new Error(`Erreur Zoom: ${errorText}`);
+        }
+
+        return await meetingDetailsRes.json();
+      })
+    );
+
+    return NextResponse.json(meetings);
   } catch (error) {
     console.error(error);
     const message = error instanceof Error ? error.message : "Erreur inconnue";

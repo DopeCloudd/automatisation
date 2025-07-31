@@ -302,8 +302,6 @@ export function CreateTemplatesForm() {
     }
   }
 
-  console.log("Formatrices:", formatrices);
-
   // Filtrer les formatrices pour ne garder que : Aurelie, Cecile, Clemence et Laura
   const validFormatrices = formatrices?.filter(
     (f) =>

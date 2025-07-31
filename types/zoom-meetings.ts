@@ -34,6 +34,17 @@ export interface CreateZoomMeetingResponse {
   duration: number;
 }
 
+export interface ZoomMeetingInvitee {
+  email: string;
+  internal_user: boolean;
+}
+
+export interface ZoomMeetingSettings {
+  alternative_hosts?: string;
+  meeting_invitees?: ZoomMeetingInvitee[];
+  [key: string]: unknown;
+}
+
 export interface ZoomMeetingDetails {
   id: string;
   topic: string;
@@ -42,8 +53,8 @@ export interface ZoomMeetingDetails {
   duration: number;
   join_url: string;
   host_id: string;
-  settings: Record<string, string | boolean | number>;
-  [key: string]: unknown; // Pour supporter d'autres props
+  settings: ZoomMeetingSettings;
+  [key: string]: unknown;
 }
 
 export interface ZoomMeetingSummary {
